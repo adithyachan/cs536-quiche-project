@@ -5,7 +5,7 @@
 - `quiche-server` contains everything needed to spin-up a QUICHE file server docker container
 - `nginx-server` will contain our HTTP server setup
 
-Currently using the `tc` (Traffic Control) linux utility to handle rate-limiting bandwidth of the server to simulate link bandwidth. Ideally, each of the clients runs in docker containers which are also bandwidth limited as well but this works for now.
+Currently using the `tc` (Traffic Control) linux utility through a script called "wondershaper" to handle rate-limiting bandwidth of the server to simulate link bandwidth. Ideally, each of the clients run in docker containers which are also bandwidth limited as well but this works for now.
 
 ## Quiche Server
 Run 
