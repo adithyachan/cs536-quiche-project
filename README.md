@@ -77,5 +77,5 @@ If this is your first time running `client-runner.py`, then also run
 
 Run 
 ```make run-client```
-to run `client-runner.py`. So far it just runs `quiche-client` 10 times for each file and records the file download speed. Need to improve funcationality.
+to run `client-runner.py`. So far it just runs `quiche-client` 10 times for each file and records the file download speed. Need to improve funcationality. If you want to change which client is being run, need to update the python script manually. Need to add ability to pass args.
 
