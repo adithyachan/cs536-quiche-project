@@ -1,51 +1,40 @@
-############################################################################
-##
-##     This file is part of Purdue CS 536.
-##
-##     Purdue CS 536 is free software: you can redistribute it and/or modify
-##     it under the terms of the GNU General Public License as published by
-##     the Free Software Foundation, either version 3 of the License, or
-##     (at your option) any later version.
-##
-##     Purdue CS 536 is distributed in the hope that it will be useful,
-##     but WITHOUT ANY WARRANTY; without even the implied warranty of
-##     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##     GNU General Public License for more details.
-##
-##     You should have received a copy of the GNU General Public License
-##     along with Purdue CS 536. If not, see <https://www.gnu.org/licenses/>.
-##
-#############################################################################
+# Variables
+QUICHE_IMAGE_NAME := quiche-server-image
+QUICHE_CONTAINER_NAME := quiche-server
+QUICHE_DOCKERFILE := quiche-server/Dockerfile
+QUICHE_MOUNT_SRC := $(shell pwd)/quiche-server/mount
+QUICHE_MOUNT_DST := /mnt/quiche
+PORT := 4433
 
-####################################################################
-############### Set up Mininet and Controller ######################
-####################################################################
+PYTHON := python3 
 
-SCRIPTS = scripts
+.PHONY: quiche-server
+all: build-quiche run-quiche
 
-.PHONY: mininet controller cli netcfg host-h1 host-h2
+.PHONY: build-quiche
+build-quiche:
+	docker build -t $(QUICHE_IMAGE_NAME) -f $(QUICHE_DOCKERFILE) .
 
-mininet:
-	$(SCRIPTS)/mn-stratum
+.PHONY: run-quiche
+run-quiche:
+	docker run -d --name $(QUICHE_CONTAINER_NAME) -p $(PORT):$(PORT) --cap-add NET_ADMIN --mount type=bind,source=$(QUICHE_MOUNT_SRC),target=$(QUICHE_MOUNT_DST),bind-propagation=rprivate $(QUICHE_IMAGE_NAME) $(BW)
 
-mininet-prereqs:
-	docker exec -it mn-stratum bash -c \
-		"echo deb http://deb.debian.org/debian buster main non-free contrib > /etc/apt/sources.list.d/test.list ; \
-		 apt-get update ; \
-		 apt-get install libgtk-3-0 libnss3-tools libc6 iptraf -y --allow-unauthenticated"
+.PHONY: shell-quiche
+shell-quiche:
+	docker exec -it $(QUICHE_CONTAINER_NAME) /bin/bash
+.PHONY: stop-quiche
+stop-quiche:
+	docker stop $(QUICHE_CONTAINER_NAME)
 
-controller:
-	ONOS_APPS=gui,proxyarp,drivers.bmv2,lldpprovider,hostprovider \
-	$(SCRIPTS)/onos
+.PHONY: kill-quiche
+kill-quiche:
+	docker rm --force $(QUICHE_CONTAINER_NAME)
 
-cli:
-	$(SCRIPTS)/onos-cli
+.PHONY: clean-quiche
+clean-quiche: kill-quiche
+	docker rmi $(QUICHE_IMAGE_NAME)
 
-netcfg:
-	$(SCRIPTS)/onos-netcfg cfg/netcfg.json
+.PHONY: run-client
+run-client:
+	$(PYTHON) client/client-runner.py
 
-host-h1:
-	$(SCRIPTS)/utils/mn-stratum/exec h1
-
-host-h2:
-	$(SCRIPTS)/utils/mn-stratum/exec h2
