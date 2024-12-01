@@ -8,7 +8,7 @@
 Currently using the `tc` (Traffic Control) linux utility through a script called "wondershaper" to handle rate-limiting bandwidth of the server to simulate link bandwidth. Ideally, each of the clients run in docker containers which are also bandwidth limited as well but this works for now.
 
 >Note: Do not run the quiche and http servers at the same time as docker will assign one 172.17.0.2 and the other 172.17.0.2. 
->TODO: Need to fix by adding a docker network setup call 
+> TODO: Need to fix by adding a docker network setup call 
 
 ## Quiche Server
 Run 
@@ -62,10 +62,22 @@ to kill the server
 
 ## Client
 
-Ideally, supports both the quiche and http client executables.
+Ideally, supports both the quiche and http client executables. Assuming you are running this on a fresh ubuntu 24.04 EC2 instance.
 
 Run
-```python -m .venv venv```
+```sudo apt install python3```
+if `python3` is not present on your system
+
+Run
+```sudo apt install python3-venv```
+if `python3 -m venv` throws an error
+
+Run
+```sudo apt install python3-pip```
+if `python3 -m pip` throws an error
+
+Run
+```python3 -m venv .venv```
 to create a virtual environment
 
 Run
@@ -73,9 +85,9 @@ Run
 to activate the virtual environment
 
 If this is your first time running `client-runner.py`, then also run 
-```pip install -r requirements.txt```
+```python3 -m pip install -r requirements.txt```
 
 Run 
 ```make run-client```
-to run `client-runner.py`. So far it just runs `quiche-client` 10 times for each file and records the file download speed. Need to improve funcationality. If you want to change which client is being run, need to update the python script manually. Need to add ability to pass args.
+to run `client-runner.py`. So far it just runs `quiche-client` 10 times for each file and records the file download speed. Need to improve funcationality.
 
