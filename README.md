@@ -7,10 +7,25 @@
 
 Currently using the `tc` (Traffic Control) linux utility through a script called "wondershaper" to handle rate-limiting bandwidth of the server to simulate link bandwidth. Ideally, each of the clients run in docker containers which are also bandwidth limited as well but this works for now.
 
+>Note: Do not run the quiche and http servers at the same time as docker will assign one 172.17.0.2 and the other 172.17.0.2. 
+>TODO: Need to fix by adding a docker network setup call 
+
 ## Quiche Server
 Run 
-```make quiche-server``` 
-to build the docker image and run the server (at `172.17.0.2:4433`)
+```make build-quiche``` 
+to build the docker image 
+
+Run
+```make run-quiche```
+to run the server (at `172.17.0.2:4433`) and default with 1Mbps bandwidth
+
+Run
+```make run-quiche BW=<bandwidth in Kbps>```
+to run the server (at `172.17.0.2:4433`) with a specific bandwidth
+
+Ex.
+```make run-quiche BW=1000```
+runs the server with 1Mbps bandwidth
 
 Run
 ```make shell-quiche```
@@ -20,8 +35,30 @@ Run
 ```make kill-quiche```
 to kill the server
 
-## HTTP Server (TODO)
-Planning to use nginx for a containerized tcp/http server. Have gotten started on the dockerfile for this.
+## HTTP Server
+Run 
+```make build-http``` 
+to build the docker image 
+
+Run
+```make run-http```
+to run the server (at `172.17.0.2:4433`) and default with 1Mbps bandwidth
+
+Run
+```make run-http BW=<bandwidth in Kbps>```
+to run the server (at `172.17.0.2:4433`) with a specific bandwidth
+
+Ex.
+```make run-http BW=1000```
+runs the server with 1Mbps bandwidth
+
+Run
+```make shell-http```
+to enter the server container and poke around if necessary
+
+Run 
+```make kill-http```
+to kill the server
 
 ## Client
 
