@@ -9,7 +9,7 @@ quiche_server_url = "172.18.0.3"
 http_server_url  = "172.18.0.2"
 quiche_server_port = "4433"
 http_server_port = "8080"
-results_dir = "results/"
+results_dir = "results/download_speed/"
 
 def quiche_client(path="/"):
     start_time = time.time()

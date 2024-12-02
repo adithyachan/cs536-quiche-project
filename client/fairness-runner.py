@@ -8,7 +8,7 @@ tcp_client = "curl"
 quiche_client_path = "./client/quiche-client"
 server_url = "172.17.0.2"
 server_port = "4433"
-results_dir = "results/"
+results_dir = "results/fairness/"
 file_sizes = {"5KB.txt": 5 * 8, "10KB.txt": 10 * 8, "100KB.txt": 100 * 8, 
               "200KB.txt": 200 * 8, "500KB.txt": 500 * 8, "1MB.txt": 1024 * 8, 
               "10MB.txt": 10240 * 8}  # Sizes in kilobits
