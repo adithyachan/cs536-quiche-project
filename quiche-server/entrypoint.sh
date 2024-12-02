@@ -9,6 +9,8 @@ else
   BW=$1
 fi
 
+echo "Bandwidth value passed: $BW"
+
 # Limit all incoming and outgoing network to 1mbit/s
 /bin/bash /mnt/quiche/wondershaper/wondershaper -a eth0 -u $BW -d $BW
 

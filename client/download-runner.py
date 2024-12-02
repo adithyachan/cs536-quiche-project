@@ -31,7 +31,7 @@ def measure_download_speeds(client=quiche_client, output_file="out.csv"):
     data = {file: [] for file in files}
     
     for file in files:
-        for _ in range(10):
+        for _ in range(5):
             data[file].append(client("/" + file))
 
     df = pd.DataFrame(data)

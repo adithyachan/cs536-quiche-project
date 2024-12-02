@@ -51,7 +51,7 @@ build-http:
 
 .PHONY: run-http
 run-http:
-	docker run -d --name $(HTTP_CONTAINER_NAME) -p $(HTTP_PORT):$(HTTP_PORT) --net $(NETWORK_NAME) --ip $(HTTP_IP) --cap-add NET_ADMIN $(HTTP_IMAGE_NAME)
+	docker run -d --name $(HTTP_CONTAINER_NAME) -p $(HTTP_PORT):$(HTTP_PORT) --net $(NETWORK_NAME) --ip $(HTTP_IP) --cap-add NET_ADMIN $(HTTP_IMAGE_NAME) $(BW)
 
 .PHONY: shell-http
 shell-http:
@@ -77,7 +77,7 @@ run-client:
 generate-download-data:
 	make build-http
 	make build-quiche
-	@for BW in 10 100 1000 10000 100000; do \
+	@for BW in 10000 100000; do \
 		echo "Running tests for $$BW kbps"; \
 		$(MAKE) run-http BW=$$BW; \
 		$(MAKE) run-quiche BW=$$BW; \
