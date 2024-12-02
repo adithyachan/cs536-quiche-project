@@ -98,3 +98,6 @@ for a 1mbps connection.
 ## Generating Test Data
 If you are uninterested in running granular operations with the specific client and servers, you may generate test data for 5 different link speeds with. This will build both servers then for each link size it will run both servers, run the dowload-runner, and kill both servers. 
 ```make generate-download-data```
+
+TODO: details for fairness, right now just dev notes
+Run both servers then ```python3 ./client/fairness-runner.py --quic-conns 3 --tcp-conns 3 --bandwidth 1000```, all 3 paramaters have defaults too
