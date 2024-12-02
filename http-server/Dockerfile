@@ -14,6 +14,6 @@ COPY http-server/mount/certs /mnt/http-server
 COPY http-server/mount/files /mnt/http-server
 COPY http-server/mount/wondershaper /mnt/wondershaper
 
-EXPOSE 4433
+EXPOSE 8080
 
 ENTRYPOINT ["/bin/bash", "/mnt/entrypoint.sh"]

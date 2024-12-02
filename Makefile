@@ -8,7 +8,11 @@ QUICHE_MOUNT_DST := /mnt/quiche
 HTTP_IMAGE_NAME := http-server-image
 HTTP_CONTAINER_NAME := http-server
 HTTP_DOCKERFILE := http-server/Dockerfile
-PORT := 4433
+QUICHE_PORT := 4433
+HTTP_PORT := 8080
+NETWORK_NAME := static_ip_network
+QUICHE_IP := 172.18.0.3
+HTTP_IP := 172.18.0.2
 
 VENV := .venv
 PYTHON := python3 
@@ -22,7 +26,8 @@ build-quiche:
 
 .PHONY: run-quiche
 run-quiche:
-	docker run -d --name $(QUICHE_CONTAINER_NAME) -p $(PORT):$(PORT) --cap-add NET_ADMIN --mount type=bind,source=$(QUICHE_MOUNT_SRC),target=$(QUICHE_MOUNT_DST),bind-propagation=rprivate $(QUICHE_IMAGE_NAME) $(BW)
+	docker network create --subnet=172.18.0.0/24 $(NETWORK_NAME) || true
+	docker run -d --name $(QUICHE_CONTAINER_NAME) -p $(QUICHE_PORT):$(QUICHE_PORT) --net $(NETWORK_NAME) --ip $(QUICHE_IP) --cap-add NET_ADMIN --mount type=bind,source=$(QUICHE_MOUNT_SRC),target=$(QUICHE_MOUNT_DST),bind-propagation=rprivate $(QUICHE_IMAGE_NAME) $(BW)
 
 .PHONY: shell-quiche
 shell-quiche:
@@ -46,7 +51,7 @@ build-http:
 
 .PHONY: run-http
 run-http:
-	docker run -d --name $(HTTP_CONTAINER_NAME) -p $(PORT):$(PORT) --cap-add NET_ADMIN $(HTTP_IMAGE_NAME) $(BW)
+	docker run -d --name $(HTTP_CONTAINER_NAME) -p $(HTTP_PORT):$(HTTP_PORT) --net $(NETWORK_NAME) --ip $(HTTP_IP) --cap-add NET_ADMIN $(HTTP_IMAGE_NAME)
 
 .PHONY: shell-http
 shell-http:
@@ -66,5 +71,17 @@ clean-http: kill-http
 
 .PHONY: run-client
 run-client:
-	$(PYTHON) client/client-runner.py
+	$(PYTHON) client/download-runner.py --bandwidth $(BW)
 
+.PHONY: generate-download-data
+generate-download-data:
+	make build-http
+	make build-quiche
+	@for BW in 10 100 1000 10000 100000; do \
+		echo "Running tests for $$BW kbps"; \
+		$(MAKE) run-http BW=$$BW; \
+		$(MAKE) run-quiche BW=$$BW; \
+		$(MAKE) run-client BW=$$BW; \
+		$(MAKE) kill-http; \
+		$(MAKE) kill-quiche; \
+	done

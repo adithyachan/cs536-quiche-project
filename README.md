@@ -3,12 +3,11 @@
 - `Makefile` contains commands to build and run various aspects of the system
 - `client` is contains client side code intended to be run on the host machine
 - `quiche-server` contains everything needed to spin-up a QUICHE file server docker container
-- `nginx-server` will contain our HTTP server setup
+- `http-server` will contain our HTTP server setup
 
 Currently using the `tc` (Traffic Control) linux utility through a script called "wondershaper" to handle rate-limiting bandwidth of the server to simulate link bandwidth. Ideally, each of the clients run in docker containers which are also bandwidth limited as well but this works for now.
 
->Note: Do not run the quiche and http servers at the same time as docker will assign one 172.17.0.2 and the other 172.17.0.2. 
-> TODO: Need to fix by adding a docker network setup call 
+
 
 ## Quiche Server
 Run 
