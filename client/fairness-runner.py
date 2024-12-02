@@ -2,6 +2,7 @@ import subprocess as sp
 import time
 import pandas as pd
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 
 tcp_client_path = "curl"
 quiche_client_path = "./client/quiche-client"
@@ -11,34 +12,46 @@ quiche_server_port = "4433"
 http_server_port = "8080"
 results_dir = "results/fairness/"
 
-def quiche_client(path="/", connections=1):
+def quiche_client(file_path="/500KB.txt"):
     start_time = time.time()
-    # Run the specified number of QUIC connections using parallel execution
-    sp.run([f"{quiche_client_path}", f"https://{quiche_server_url}:{quiche_server_port}{path}", "--no-verify", "--conns", str(connections)], stdout=sp.DEVNULL, stderr=sp.DEVNULL)
+    sp.run(
+        [quiche_client_path, f"https://{quiche_server_url}:{quiche_server_port}{file_path}", "--no-verify"],
+        stdout=sp.DEVNULL,
+        stderr=sp.DEVNULL,
+    )
+    end_time = time.time()
+    return end_time - start_time  # Elapsed time
+
+def http_client(file_path="/500KB.txt"):
+    start_time = time.time()
+    sp.run([tcp_client_path, "-k", "https://" + http_server_url + ":" + http_server_port + file_path, "-o", "/dev/null"], stdout = sp.DEVNULL, stderr = sp.DEVNULL)
     end_time = time.time()
     elapsed_time = end_time - start_time
     return elapsed_time
 
-def http_client(path="/", connections=1):
-    start_time = time.time()
-    # Run the specified number of TCP connections using parallel execution
-    sp.run([f"{tcp_client_path}", "-k", f"https://{http_server_url}:{http_server_port}{path}", "-o", "/dev/null", "--max-conns", str(connections)], stdout=sp.DEVNULL, stderr=sp.DEVNULL)
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    return elapsed_time
+def run_clients(client_func, file_path, num_clients):
+    """Run multiple clients in parallel using threads."""
+    with ThreadPoolExecutor(max_workers=num_clients) as executor:
+        futures = [executor.submit(client_func, file_path=file_path) for _ in range(num_clients)]
+        return [future.result() for future in futures]
 
 def measure_throughput(client, bandwidth, connections, output_file):
     # Files to download
-    files = ["1MB.txt"]
-    data = {file: [] for file in files}
-    
-    for file in files:
-        for _ in range(5):  # Run each test 5 times
-            elapsed_time = client(path=f"/{file}", connections=connections)
-            throughput_mbps = (500 * 8 * 1000) / elapsed_time / 1_000_000
-            data[file].append(throughput_mbps)
+    file_path = "/500KB.txt"
+    file_size_kb = 500
+    results = []
 
-    df = pd.DataFrame(data)
+    for _ in range(5):  # Run each test 5 times
+        elapsed_times = run_clients(client, file_path, connections)
+        throughputs = [(file_size_kb * 8 / elapsed_time / 1_000) for elapsed_time in elapsed_times]  # Mbps
+        results.extend(throughputs)
+        # elapsed_time = client(path=f"/{file}", connections=connections)
+        # throughput_mbps = (500 * 8 * 1000) / elapsed_time / 1_000_000
+        # data[file].append(throughput_mbps)
+
+    # df = pd.DataFrame(data)
+    # df.to_csv(results_dir + output_file, index=False)
+    df = pd.DataFrame({f"Throughput (Mbps) for {connections} connections": results})
     df.to_csv(results_dir + output_file, index=False)
 
 if __name__ == "__main__":
