@@ -29,7 +29,7 @@ def http_client(path="/", connections=1):
 
 def measure_throughput(client, bandwidth, connections, output_file):
     # Files to download
-    files = ["500KB.txt"]
+    files = ["1MB.txt"]
     data = {file: [] for file in files}
     
     for file in files:

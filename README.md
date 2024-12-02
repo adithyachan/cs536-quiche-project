@@ -88,16 +88,19 @@ If this is your first time running `client-runner.py`, then also run
 
 Run 
 ```python3 ./client/download-runner.py```
-to run `download-runner.py` which just runs `quiche-client` and `http-client` 10 times for each file size and records the file download speed for the default (1mbps) link size. The QUICHE and HTTP servers must be running. If you've adjusted the server link size, you can match it with 
+to run `download-runner.py` which just runs `quiche-client` and `http-client` 5 times for each file size and records the file download speed for the default (1mbps) link size. The QUICHE and HTTP servers must be running. If you've adjusted the server link size, you can match it with 
 ```python3 ./client/download-runner.py --bandwidth xxx```
 
 Ex.
 ```python3 ./client/download-runner.py --bandwidth 1000```
 for a 1mbps connection.
 
+By default we sample the following sized files: 5KB, 10KB, 100KB, 200KB, 500KB, 1MB.txt, 10MB
+
 ## Generating Test Data
-If you are uninterested in running granular operations with the specific client and servers, you may generate test data for 5 different link speeds with. This will build both servers then for each link size it will run both servers, run the dowload-runner, and kill both servers. 
+If you are uninterested in running granular operations with the specific client and servers, you may generate test data for 3 different link speeds (10mbps, 100mbps, and 1000mbps) with the command
 ```make generate-download-data```
+This will build both servers then for each link size it will run both servers, run the dowload-runner, and kill both servers. By default we sample the following sized files: 5KB, 10KB, 100KB, 200KB, 500KB, 1MB.txt, 10MB so if you want to test smaller bandwidth speeds you should run the download-runner and remove some of the bigger file sizes. 
 
 TODO: details for fairness, right now just dev notes
 Run both servers then ```python3 ./client/fairness-runner.py --quic-conns 3 --tcp-conns 3 --bandwidth 1000```, all 3 paramaters have defaults too

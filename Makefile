@@ -77,7 +77,7 @@ run-client:
 generate-download-data:
 	make build-http
 	make build-quiche
-	@for BW in 10000 100000; do \
+	@for BW in 10000 100000 1000000; do \
 		echo "Running tests for $$BW kbps"; \
 		$(MAKE) run-http BW=$$BW; \
 		$(MAKE) run-quiche BW=$$BW; \
