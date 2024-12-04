@@ -1,14 +1,21 @@
-# CS536 Final Project
+# CS536 Final Project - Reproducing "Taking a long look at QUIC" using QUICHE
 
+## Background
+[QUIC](https://www.chromium.org/quic/) is a UDP-based transport protocol developed by Google, intended to be a faster and equally reliable alternative to TCP. QUIC has been thoroughly benchmarked in various papers including ["Taking a long look at QUIC" (Kakhki et al., 2017)](https://dl.acm.org/doi/pdf/10.1145/3131365.3131368) and ["Reproducing 'Taking a long look at QUIC'" (Wong et al., 2020)](https://reproducingnetworkresearch.wordpress.com/wp-content/uploads/2020/06/wong_tieu.pdf) where results have shown QUIC to be largely better than or at-par with TCP in most metrics. 
+
+[QUICHE](https://github.com/cloudflare/quiche) is a popular Rust implementation of QUIC with support for many popular clients and servers including NGINX, cURL, and Android. QUICHE is also signficantly easier to build than the Google Chromium implementation of QUIC (which requires building Chromium from scratch and 100 of GB of disk space). QUICHE also has a pre-built docker image which makes it easy to run the server and client in various environments.
+
+## Experimental Setup
 - `Makefile` contains commands to build and run various aspects of the system
 - `client` is contains client side code intended to be run on the host machine
 - `quiche-server` contains everything needed to spin-up a QUICHE file server docker container
 - `http-server` contains our HTTP server setup
 
-Currently using the `tc` (Traffic Control) linux utility through a script called "wondershaper" to handle rate-limiting bandwidth of the server to simulate link bandwidth. Ideally, each of the clients run in docker containers which are also bandwidth limited as well but this works for now.
+Currently, we use the `tc` (Traffic Control) linux utility through a script called "wondershaper" to handle rate-limiting bandwidth of the server to simulate link bandwidth. Our client can be run on the host machine.
 
+## Makefile Options
 
-## Quiche Server
+### Quiche Server
 Assigned IP 172.18.0.3
 Run 
 ```make build-quiche``` 
@@ -34,7 +41,7 @@ Run
 ```make kill-quiche```
 to kill the server
 
-## HTTP Server
+### HTTP Server
 Run 
 ```make build-http``` 
 to build the docker image 
@@ -59,9 +66,9 @@ Run
 ```make kill-http```
 to kill the server
 
-## Client
+### Client
 
-Ideally, supports both the quiche and http client executables. Assuming you are running this on a fresh ubuntu 24.04 EC2 instance.
+These commands assume you are running this in an Ubuntu 24+ environment. It should work on other MacOS/Linux environments but you may need to use different utilties to handle package management (Homebrew, Yum, etc).
 
 Run
 ```sudo apt install python3```
@@ -104,3 +111,13 @@ This will build both servers then for each link size it will run both servers, r
 
 TODO: details for fairness, right now just dev notes
 Run both servers then ```python3 ./client/fairness-runner.py --quic-conns 3 --tcp-conns 3 --bandwidth 1000```, all 3 paramaters have defaults too
+
+## Results
+You can view our results data in the `results` folder. Additionally, the `viz.ipynb` notebook is provided for recreating or modifying our analysis should you choose to do so.
+
+Overall, we found that HTTPS2/TCP beat HTTPS3/QUIC when using the QUICHE server implementation. An interesting anomoly we observed was that the quiche server consistently used only one-third of the given bandwidth, which would largely explain why it failed to keep up with even a simple HTTP server.
+
+Additionally, our methodology, running these experiments through a docker container, simplifies the setup and build process, which we believe gives us a signficant edge over current methodologies using the Chromium QUIC build which takes hours to complete.
+
+## Future Work
+We believe there is a lot of room for future work. In particiular, determining the root cause as to why the quiche server perfomed so poorly compared to the Chromium quic server. Additionally, given quiche can integrate directly with cURL and NGINX, these could be used to benchmark performance to provide insight into whether this problem is isolated to the default quiche server or the entire Rust implementation.
