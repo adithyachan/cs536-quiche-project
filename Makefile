@@ -85,3 +85,31 @@ generate-download-data:
 		$(MAKE) kill-http; \
 		$(MAKE) kill-quiche; \
 	done
+
+.PHONY: generate-download-data
+generate-fairness-data:
+	make clean-http
+	make clean-quiche
+	make build-http
+	make build-quiche
+	echo "Running tests for 1 mbps...";
+	$(MAKE) run-http BW=1000;
+	$(MAKE) run-quiche BW=1000
+	$(PYTHON) client/fairness-runner.py --quic-conns 1 --tcp-conns 1 --bandwidth 1000
+	$(PYTHON) client/fairness-runner.py --quic-conns 2 --tcp-conns 2 --bandwidth 1000
+	$(PYTHON) client/fairness-runner.py --quic-conns 3 --tcp-conns 3 --bandwidth 1000
+	$(MAKE) kill-http;
+	$(MAKE) kill-quiche;
+	echo "Tearing down 1 mbps containers...";
+	make clean-http
+	make clean-quiche
+	make build-http
+	make build-quiche
+	echo "Running tests for 10 mbps...";
+	$(MAKE) run-http BW=10000;
+	$(MAKE) run-quiche BW=10000
+	$(PYTHON) client/fairness-runner.py --quic-conns 1 --tcp-conns 1 --bandwidth 10000
+	$(PYTHON) client/fairness-runner.py --quic-conns 2 --tcp-conns 2 --bandwidth 10000
+	$(PYTHON) client/fairness-runner.py --quic-conns 3 --tcp-conns 3 --bandwidth 10000
+	$(MAKE) kill-http;
+	$(MAKE) kill-quiche;
